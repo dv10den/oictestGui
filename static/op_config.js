@@ -68,6 +68,17 @@ app.controller('IndexCtrl', function ($scope, toaster, opConfigurationFactory, v
         verifyConfigFactory.verifyConfig().success(getVerifyConfigSuccessCallback).error(errorCallback);
     };
 
+    function enableGUI(){
+        $('button').prop('disabled', false);
+    }
+
+    /**
+     * Confirms that the configuration will be able to run tests which requires logging in
+     * @param data - The result returned from the server
+     * @param status - The status on the response from the server
+     * @param headers - The header on the response from the server
+     * @param config - The configuration on the response from the server
+     */
     function getVerifyConfigSuccessCallback(data, status, headers, config) {
 
         statusNumber = data['result']['status'];
@@ -78,7 +89,7 @@ app.controller('IndexCtrl', function ($scope, toaster, opConfigurationFactory, v
            bootbox.alert("Your configurations are verified you should now be able to run the tests requiring a user to be logged in");
         }
 
-        $('button').prop('disabled', false);
+        enableGUI();
     }
 
     /**
@@ -158,12 +169,12 @@ app.controller('IndexCtrl', function ($scope, toaster, opConfigurationFactory, v
      * Creates an iframe and shows to modal window containing the login screen
      * @param data - Result sent from the server
      */
-    var createIframeAndShowInModelWindow = function(data) {
+    function createIframeAndShowInModelWindow(data) {
         var subTestList = data['result']['tests'];
         var lastElementIndex = subTestList.length -1;
 
         $('#modalWindowInteraction').modal('show');
-        $('#modalWindowInteractionContent').empty();
+        $('#modalWindowHTMLContent').empty();
 
         //Resets the foundInteractionStatus to false if the user exit the log in window
         $('#modalWindowInteraction').on('hidden.bs.modal', function (e) {
@@ -177,8 +188,8 @@ app.controller('IndexCtrl', function ($scope, toaster, opConfigurationFactory, v
         iframe.setAttribute('width', '100%');
         iframe.setAttribute('height', '750px');
 
-        $('#modalWindowInteractionContent').append("<h1>Information</h1><span>In order to use this application you need to log in to the IDP. Information, like username and password, will be stored on the server which means that you only have to do this once  </span>");
-        $('#modalWindowInteractionContent').append(iframe);
+        $('#modalWindowHTMLContent').append("<h1>Information</h1><span>In order to use this application you need to log in to the OP. Information, like username and password, will be stored on the server which means that you only have to do this once  </span>");
+        $('#modalWindowHTMLContent').append(iframe);
 
         iframe.contentWindow.document.open();
         iframe.contentWindow.document.write(loginPage.innerHTML);
@@ -228,6 +239,10 @@ app.controller('IndexCtrl', function ($scope, toaster, opConfigurationFactory, v
         }
     };
 
+    $scope.toggleNetscapeCookieExample = function(){
+        $("#modalWindowNetscapeCookieExample").modal('toggle');
+    };
+
     /**
      * Sets the configuration returned from the server
      * @param data - The result returned from the server
@@ -253,7 +268,7 @@ app.controller('IndexCtrl', function ($scope, toaster, opConfigurationFactory, v
     function showVerifyConfigDialog(){
         bootbox.dialog({
             message: "Your configuration was successfully stored on the server. <br><br> Some tests requires the " +
-                "user to be loggin, this could be done by either using interactions or cookies. " +
+                "user to be logged in, this could be done by either using interactions or cookies. " +
                 "Do you want to verify that you could run this kinds of tests?",
             title: "Verify configuration",
             buttons: {
@@ -373,6 +388,8 @@ app.controller('IndexCtrl', function ($scope, toaster, opConfigurationFactory, v
      */
     function errorCallback(data, status, headers, config) {
         bootbox.alert(data.ExceptionMessage);
+
+        enableGUI();
     }
 
     /**
