@@ -62,10 +62,33 @@ app.controller('IndexCtrl', function ($scope, toaster, opConfigurationFactory, v
         'EMPTY_STATUS':{value: 6, string:'EMPTY_STATUS'}
     };
 
+    function verifyConfigErrorCallback(data, status, headers, config){
+
+        enableGUI();
+        $('#modalWindowInteraction').modal('show');
+        $('#modalWindowHTMLContent').append(data.ExceptionMessage);
+
+        if (data.HTML != null){
+            var loginPage = document.createElement('html');
+            loginPage.innerHTML = data['HTML'];
+
+            //Create a iframe and present the login screen inside the iframe
+            var iframe = document.createElement('iframe');
+            iframe.setAttribute('width', '100%');
+            iframe.setAttribute('height', '750px');
+
+            $('#modalWindowHTMLContent').append(iframe);
+
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(loginPage.innerHTML);
+            iframe.contentWindow.document.close();
+        }
+    }
+
     $scope.runVerifyConfig = function () {
         $('button').prop('disabled', true);
 
-        verifyConfigFactory.verifyConfig().success(getVerifyConfigSuccessCallback).error(errorCallback);
+        verifyConfigFactory.verifyConfig().success(getVerifyConfigSuccessCallback).error(verifyConfigErrorCallback);
     };
 
     function enableGUI(){
